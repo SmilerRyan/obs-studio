@@ -759,23 +759,6 @@ static void main_crash_handler(const char *format, va_list args, void * /* param
 	snprintf(message_buffer.get(), size + 1, CRASH_MESSAGE, absolutePath.c_str());
 
 	string finalMessage = string(message_buffer.get(), message_buffer.get() + size);
-
-	int ret = MessageBoxA(NULL, finalMessage.c_str(), "OBS has crashed!", MB_YESNO | MB_ICONERROR | MB_TASKMODAL);
-
-	if (ret == IDYES) {
-		size_t len = strlen(text);
-
-		HGLOBAL mem = GlobalAlloc(GMEM_MOVEABLE, len);
-		memcpy(GlobalLock(mem), text, len);
-		GlobalUnlock(mem);
-
-		OpenClipboard(0);
-		EmptyClipboard();
-		SetClipboardData(CF_TEXT, mem);
-		CloseClipboard();
-	}
-
-	exit(-1);
 }
 
 static void load_debug_privilege(void)
