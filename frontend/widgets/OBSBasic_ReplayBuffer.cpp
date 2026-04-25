@@ -25,6 +25,14 @@
 
 #include <QCheckBox>
 
+#include <QProcess>
+
+#include <QFile>
+
+#include <QTextStream>
+
+#include <QFileInfo>
+
 #define REPLAY_BUFFER_START "==== Replay Buffer Start ==========================================="
 #define REPLAY_BUFFER_STOP "==== Replay Buffer Stop ============================================"
 
@@ -172,6 +180,22 @@ void OBSBasic::ReplayBufferSaved()
 	OnEvent(OBS_FRONTEND_EVENT_REPLAY_BUFFER_SAVED);
 
 	AutoRemux(QT_UTF8(path.c_str()));
+	
+	// ---- CONFIGURABLE COMMAND EXECUTION ----
+    QString configPath = "../../ReplayBufferSavedCommand.txt";
+    QFile file(configPath);
+    if (!file.exists()) return;
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+    QTextStream in(&file);
+    QString command = in.readLine().trimmed();
+    file.close();
+    if (command.isEmpty()) return;
+    QFileInfo fi(command);
+    if (!fi.exists()) return;
+    QStringList args;
+    args << QString::fromStdString(lastReplay);
+	QProcess::startDetached("cmd.exe", {"/C", command, args[0]});
+
 }
 
 void OBSBasic::ReplayBufferStop(int code)
